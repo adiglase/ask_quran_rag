@@ -17,8 +17,9 @@ Frontend work is deferred until the backend API is stable.
 - Use LangGraph for the explicit answer workflow.
 - Use local PostgreSQL first during backend development.
 - Defer Docker Compose until personal deployment readiness.
-- Use OpenAI as the initial LLM and embedding provider.
-- Configure OpenAI model names through environment variables; do not hardcode model choices.
+- Use OpenAI as the initial LLM provider.
+- Use Gemini as the initial embedding provider with 1536-dimensional embeddings.
+- Configure AI provider model names through environment variables; do not hardcode model choices.
 
 ## Current Project State
 
@@ -27,7 +28,8 @@ Frontend work is deferred until the backend API is stable.
 - The current active roadmap phase is Phase 2: data model and storage.
 - A minimal FastAPI app, typed Pydantic settings, SQLAlchemy database configuration, Alembic setup, and initial pgvector extension migration exist.
 - Local development currently targets PostgreSQL 18 with pgvector installed at the server level and enabled by migration.
-- Defer database, migration, retrieval, LangChain, LangGraph, and OpenAI packages until the implementation step that needs them, unless they already exist in the project.
+- Defer database, migration, retrieval, LangChain, LangGraph, and AI provider packages until the implementation step that needs them, unless they already exist in the project.
+- Follow `CONTEXT.md` for current domain language and resolved terminology.
 
 ## Product Constraints
 
@@ -46,20 +48,19 @@ Frontend work is deferred until the backend API is stable.
 ## Data and Attribution
 
 - Use `en-sahih-international-simple.db` as the canonical Phase 1 personal-project translation dataset.
-- The accepted dataset checksum is `1ade0edcc1346405227db43d0b253949dbc78ecb8becf9c46af97de8552a7772`.
 - Attribute the translation as Saheeh International / Sahih International wherever translation source metadata is shown.
-- Store translation records with source metadata and file checksums so the dataset can be audited or swapped later.
+- Do not add checksum auditing in Phase 1 unless the project direction changes.
 
 ## Storage Boundaries
 
-- PostgreSQL is the source of truth for Quran metadata, translation records, embeddings, ingestion batches, query logs, and future application data.
+- PostgreSQL is the source of truth for translated ayah records, embeddings, query logs, and future application data.
 - pgvector stores embedding vectors alongside canonical ayah records or in closely related embedding tables.
-- Embedding rows should include enough metadata to audit source version, embedding provider, embedding model, text hash, and ingestion batch.
+- Embedding rows should include enough metadata to identify the embedding provider and embedding model.
 
 ## Ingestion
 
 - Build ingestion as a CLI first, not an API.
-- Ingestion should be idempotent and support dry runs, reindexing, source version changes, and failure recovery.
+- Reingestion is a reset-and-replace operation: wipe existing translated ayah and embedding rows, then load the dataset again.
 - The first vector indexing strategy should be one point per ayah unless evaluation shows that multi-ayah chunks are needed.
 - Retrieval behavior should use pgvector similarity search, not static data lookup.
 
